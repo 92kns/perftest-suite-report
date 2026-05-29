@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>PerfTest Suite Failure Report</title>
+<style>
+body { font-family: sans-serif; padding: 1em; max-width: 960px; }
+h2 { margin: 1em 0 .3em; }
+h3 { margin: .8em 0 .2em; color: #555; font-size: 1em; }
+.meta { font-size: 0.9em; color: #666; user-select: none; margin-bottom: 1.2em; }
+.harness { margin-top: 1.2em; }
+.harness-header { font-size: 1.1em; font-weight: bold; border-bottom: 2px solid #e76800; padding-bottom: .2em; margin-bottom: .5em; }
+.harness-totals { font-size: .85em; color: #555; margin-left: .5em; font-weight: normal; }
+.suite { margin-top: 10px; border-left: 3px solid #e76800; padding-left: .8em; }
+.suite.spike { border-left-color: #d00; }
+.suite-header { font-weight: bold; font-size: 1em; margin-bottom: .2em; }
+.rank { color: #aaa; font-size: 0.85em; margin-right: .3em; }
+.badge { background: #e76800; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 0.82em; margin-left: .3em; }
+.badge2d { background: #888; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 0.82em; margin-left: .3em; }
+.badge-spike { background: #d00; color: #fff; padding: 2px 7px; border-radius: 3px; font-size: 0.82em; margin-left: .3em; }
+ul.details { list-style: circle; padding-left: 1.5em; margin: .25em 0 0; }
+ul.subdetails { list-style: square; padding-left: 2em; margin: .1em 0 0; }
+ul.buglist { list-style: disc; padding-left: 1.5em; margin: .1em 0 0; }
+ul.buglist li { margin-bottom: .15em; }
+a { color: #0060df; }
+</style>
+</head>
+<body>
+
+<h2>🔥 Top {{.TopN}} Failing Test Suites (last {{.DaysBack}} days)</h2>
+<p class="meta">
+  Generated: {{.Generated}}
+  &nbsp;|&nbsp; <a href="https://github.com/92kns/perftest_triage_report/issues" target="_blank">🐞 File an issue</a>
+</p>
+
+{{range .Harnesses}}
+<div class="harness">
+  <div class="harness-header">
+    {{.Name}}
+    <span class="harness-totals">— {{.TotalFailures}} failures ({{$.DaysBack}}d){{if .TwoDayFails}}, {{.TwoDayFails}} (2d){{end}}</span>
+  </div>
+
+  {{range .Suites}}
+  <div class="suite{{if .Spike}} spike{{end}}">
+    <div class="suite-header">
+      <span class="rank">#{{.Rank}}</span>{{.Suite}}<span class="badge">{{.TotalFailures}} ({{$.DaysBack}}d)</span>{{if .TwoDayFails}}<span class="badge2d">{{.TwoDayFails}} (2d)</span>{{end}}{{if .Spike}}<span class="badge-spike">🔺 spiking</span>{{end}}
+    </div>
+    <ul class="details">
+      {{if .Platforms}}
+      <li>Platforms:
+        <ul class="subdetails">{{range .Platforms}}<li>{{.}}</li>{{end}}</ul>
+      </li>
+      {{end}}
+      {{if .Trees}}
+      <li>Repositories:
+        <ul class="subdetails">{{range .Trees}}<li>{{.}}</li>{{end}}</ul>
+      </li>
+      {{end}}
+      {{if .Bugs}}
+      <li>Contributing bugs:
+        <ul class="buglist">
+          {{range .Bugs}}<li><a href="{{.Link}}" target="_blank">Bug {{.ID}}</a> <a href="{{.GraphLink}}" target="_blank" title="Orange Factor graph">📈</a> &mdash; {{.Summary}} <b>({{.Failures}})</b>{{if .Component}} <span style="color:#888;font-size:.85em">[{{.Component}}]</span>{{end}}</li>{{end}}
+        </ul>
+      </li>
+      {{end}}
+    </ul>
+  </div>
+  {{end}}
+</div>
+{{end}}
+
+<script>
+document.querySelectorAll('ul.subdetails li').forEach(el => {
+  el.innerHTML = el.innerHTML.replace(/(:\s*)(\d+)/g, '$1<b>$2</b>');
+});
+</script>
+</body>
+</html>
